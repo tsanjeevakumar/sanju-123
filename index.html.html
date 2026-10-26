@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head><title>Pizza Palace - With Backend</title>
+<style>
+body{font-family:Arial; background:#fff5f0; padding:20px; text-align:center}
+.card{background:white; padding:15px; border-radius:12px; width:220px; display:inline-block; margin:10px; box-shadow:0 4px 8px #ccc}
+button{background:#d32f2f; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; width:100%}
+input{padding:10px; width:90%; margin:5px; border-radius:8px; border:1px solid #ddd}
+.box{background:white; padding:15px; border-radius:12px; max-width:600px; margin:20px auto; text-align:left}
+</style>
+</head>
+<body>
+<h1>🍕 Pizza Palace - Frontend + Backend</h1>
+<p>Frontend: User chuse screen | Backend: LocalStorage Database lo save avuthundi</p>
+
+<div id="menu"></div>
+
+<div class="box">
+<h2>🛒 Checkout (Frontend)</h2>
+<input id="name" placeholder="Your Name">
+<input id="addr" placeholder="Address">
+<p id="cartInfo">Cart: Empty</p>
+<h3 id="total">Total: Rs. 0</h3>
+<button onclick="placeOrder()">Place Order -> Send to Backend</button>
+<p id="msg" style="color:green"></p>
+</div>
+
+<div class="box" style="background:#e3f2fd">
+<h2>🗄️ Backend - Admin / Shop Panel</h2>
+<p>Shop owner ikkada orders chusthadu. Ivi Database nunchi vasthunnayi.</p>
+<button onclick="showOrders()" style="background:blue">Show All Orders From Database</button>
+<button onclick="clearOrders()" style="background:grey">Clear Database</button>
+<div id="orders"></div>
+</div>
+
+<script>
+// ===== FRONTEND DATA =====
+let pizzas=[{name:"Veggie Pizza",price:199},{name:"Cheese Pizza",price:249},{name:"Chicken Pizza",price:299}];
+let cart=[]; let total=0;
+let menuHtml="";
+pizzas.forEach((p,i)=>{ menuHtml+=`<div class="card"><h3>${p.name}</h3><p>Rs. ${p.price}</p><button onclick="add(${i})">Add to Cart</button></div>`; });
+document.getElementById('menu').innerHTML=menuHtml;
+
+function add(i){ cart.push(pizzas[i].name); total+=pizzas[i].price; document.getElementById('cartInfo').innerText="Cart: "+cart.join(", "); document.getElementById('total').innerText="Total: Rs. "+total; }
+
+// ===== BACKEND - DATABASE =====
+function placeOrder(){
+  let n=document.getElementById('name').value;
+  let a=document.getElementById('addr').value;
+  if(!n||!a||cart.length==0){ alert("Name, Address & Pizza select chey"); return; }
+  let order={id:Date.now(), name:n, address:a, items:cart, total:total, time:new Date().toLocaleString(), status:"New Order"};
+  
+  // Backend: Database lo save chesthunnam
+  let oldOrders = JSON.parse(localStorage.getItem("pizza_orders") || "[]");
+  oldOrders.push(order);
+  localStorage.setItem("pizza_orders", JSON.stringify(oldOrders));
+
+  document.getElementById('msg').innerText="✅ Order Saved in Backend! Order ID: "+order.id;
+  cart=[]; total=0;
+  document.getElementById('cartInfo').innerText="Cart: Empty";
+  document.getElementById('total').innerText="Total: Rs. 0";
+  showOrders();
+}
+
+function showOrders(){
+  let all = JSON.parse(localStorage.getItem("pizza_orders") || "[]");
+  if(all.length==0){ document.getElementById('orders').innerHTML="<p>No orders in Database</p>"; return; }
+  let h="";
+  all.forEach(o=>{ h+=`<hr><b>ID: ${o.id}</b><br>Name: ${o.name}<br>Items: ${o.items}<br>Total: Rs.${o.total}<br>Address: ${o.address}<br>Time: ${o.time}<br>Status: ${o.status}`; });
+  document.getElementById('orders').innerHTML=h;
+}
+function clearOrders(){ localStorage.removeItem("pizza_orders"); showOrders(); }
+showOrders();
+</script>
+</body>
+</html>
