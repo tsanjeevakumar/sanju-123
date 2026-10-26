@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pizza Palace - With Backend</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;text-align:center;background:#fff5f0;margin:0;padding:20px}
+.card{display:inline-block;background:white;padding:15px;margin:10px;border-radius:12px;width:180px;box-shadow:0 2px 8px #ddd}
+button{background:#d32f2f;color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer}
+input{padding:10px;width:80%;margin:5px;border:1px solid #ccc;border-radius:8px}
+.box{background:white;max-width:500px;margin:20px auto;padding:20px;border-radius:12px;text-align:left}
+.order{border-bottom:1px solid #eee;padding:8px 0}
+</style>
+</head>
+<body>
+<h1>🍕 Pizza Palace - Frontend + Backend</h1>
+<p>Frontend: User chuse screen | Backend: LocalStorage lo save avuthundi</p>
+
+<div class="card"><h3>Veggie Pizza</h3><p>Rs.199</p><button onclick="add('Veggie Pizza',199)">Add to Cart</button></div>
+<div class="card"><h3>Cheese Pizza</h3><p>Rs.249</p><button onclick="add('Cheese Pizza',249)">Add to Cart</button></div>
+<div class="card"><h3>Chicken Pizza</h3><p>Rs.299</p><button onclick="add('Chicken Pizza',299)">Add to Cart</button></div>
+
+<div class="box">
+<h3>🛒 Checkout (Frontend)</h3>
+<input id="name" placeholder="Customer Name">
+<input id="address" placeholder="Address">
+<p id="cart">Cart: Empty</p>
+<p id="total"><b>Total: Rs.0</b></p>
+<button style="width:100%" onclick="placeOrder()">Place Order -> Send to Backend</button>
+<p id="msg" style="color:green"></p>
+</div>
+
+<div class="box">
+<h3>🗄️ Backend - Saved Orders (Database)</h3>
+<button onclick="showOrders()" style="background:#1976d2">Show All Orders</button>
+<button onclick="clearOrders()" style="background:#555">Clear All</button>
+<div id="orders"></div>
+</div>
+
+<script>
+let cart=[], total=0;
+function add(n,p){cart.push(n);total+=p;document.getElementById('cart').innerText='Cart: '+cart.join(', ');document.getElementById('total').innerHTML='<b>Total: Rs.'+total+'</b>';}
+function placeOrder(){
+let name=document.getElementById('name').value||'Guest';
+let addr=document.getElementById('address').value||'No Address';
+if(cart.length==0){alert('Cart empty!');return;}
+let orders=JSON.parse(localStorage.getItem('pizza_orders')||'[]');
+let o={id:Date.now(),name:name,address:addr,items:cart.join(', '),total:total,time:new Date().toLocaleString()};
+orders.push(o);
+localStorage.setItem('pizza_orders',JSON.stringify(orders));
+document.getElementById('msg').innerText='✅ Order Saved to Backend! Order ID: '+o.id;
+cart=[];total=0;document.getElementById('cart').innerText='Cart: Empty';document.getElementById('total').innerHTML='<b>Total: Rs.0</b>';
+showOrders();
+}
+function showOrders(){
+let orders=JSON.parse(localStorage.getItem('pizza_orders')||'[]');
+let d=document.getElementById('orders');
+if(orders.length==0){d.innerHTML='<p>No orders yet</p>';return;}
+d.innerHTML=orders.map(x=>`<div class="order"><b>#${x.id}</b> - ${x.name}<br>${x.items}<br>Total: Rs.${x.total} | ${x.time}<br>Addr: ${x.address}</div>`).join('');
+}
+showOrders();
+</script>
+</body>
+</html>
